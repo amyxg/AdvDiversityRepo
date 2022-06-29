@@ -16,5 +16,6 @@ namespace Sabio.Services
         void CreateRelation(UserRelationAddRequest model, int userId);
         List<UserRelation> GetRelation(int userId);
         void DeleteRelation(int menteeId, int mentorId);
+        Paged<MentorAppointments> GetMentorAppts(int pageIndex, int pageSize, int userId);
     }
 }

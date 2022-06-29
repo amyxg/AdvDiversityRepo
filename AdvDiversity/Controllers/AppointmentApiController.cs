@@ -220,5 +220,34 @@ namespace Sabio.Web.Api.Controllers
             }
             return StatusCode(iCode, response);
         }
+        [HttpGet("mentorAppts")]
+        public ActionResult<ItemResponse<Paged<MentorAppointments>>> GetMentorAppts(int pageIndex, int pageSize)
+        {
+            int iCode = 200;
+            BaseResponse response = null;
+            try
+            {
+                int userId = _authService.GetCurrentUserId();
+                Paged<MentorAppointments> paginated = _appointmentService.GetMentorAppts(pageIndex, pageSize, userId);
+
+                if (paginated == null)
+                {
+                    iCode = 404;
+                    response = new ErrorResponse("App Resource not found");
+                }
+                else
+                {
+                    response = new ItemResponse<Paged<MentorAppointments>> { Item = paginated };
+                }
+
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                response = new ErrorResponse(ex.Message);
+                base.Logger.LogError(ex.ToString());
+            }
+            return StatusCode(iCode, response);
+        }
     }
 }

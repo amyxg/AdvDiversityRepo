@@ -288,5 +288,71 @@ namespace Sabio.Services
             );
         }
 
+        public Paged<MentorAppointments> GetMentorAppts(int pageIndex, int pageSize, int userId)
+        {
+
+            List<MentorAppointments> list = null;
+
+            Paged<MentorAppointments> pagedObject = null;
+
+            string proc = "[dbo].[Appointments_Select_ByUserId_V2]";
+
+            int totalCount = 0;
+
+            _data.ExecuteCmd(proc
+                , inputParamMapper: delegate (SqlParameterCollection collection)
+                {
+                    collection.AddWithValue("@UserId", userId);
+                    collection.AddWithValue("@PageIndex", pageIndex);
+                    collection.AddWithValue("@PageSize", pageSize);
+                }
+            , singleRecordMapper: delegate (IDataReader reader, short set)
+            {
+                int startingIndex = 0;
+                MentorAppointments appointments = MapMentorAppointments(reader, ref startingIndex);
+
+                if (totalCount == 0)
+                {
+                    totalCount = reader.GetSafeInt32(startingIndex++);
+                }
+
+                if (list == null)
+                {
+                    list = new List<MentorAppointments>();
+                }
+
+                list.Add(appointments);
+
+            });
+            if (list != null)
+            {
+
+                pagedObject = new Paged<MentorAppointments>(list, pageIndex, pageSize, totalCount);
+            }
+
+            return pagedObject;
+        }
+
+        private static MentorAppointments MapMentorAppointments(IDataReader reader, ref int startingIndex)
+        {
+            MentorAppointments appointments = new MentorAppointments();
+
+            appointments.Id = reader.GetSafeInt32(startingIndex++);
+            appointments.MentorId = reader.GetSafeInt32(startingIndex++);
+            appointments.MenteeId = reader.GetSafeInt32(startingIndex++);
+            appointments.ApptDateTime = reader.GetSafeDateTime(startingIndex++);
+            appointments.ApptTypeId = reader.GetSafeInt32(startingIndex++);
+            appointments.ApptType = reader.GetSafeString(startingIndex++);
+            appointments.Description = reader.GetSafeString(startingIndex++);
+            appointments.AppointmentUrl = reader.GetSafeString(startingIndex++);
+            appointments.ApptStatusId = reader.GetSafeInt32(startingIndex++);
+            appointments.ApptStatus = reader.GetSafeString(startingIndex++);
+            appointments.IsFirstMeeting = reader.GetSafeBool(startingIndex++);
+            appointments.FirstName = reader.GetSafeString(startingIndex++);
+            appointments.LastName = reader.GetSafeString(startingIndex++);
+            appointments.AvatarUrl = reader.GetSafeString(startingIndex++);
+            return appointments;
+        }
+
     }
 }
